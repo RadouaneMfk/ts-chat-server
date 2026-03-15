@@ -1,5 +1,5 @@
 import express from "express";
-import { configDotenv } from "../node_modules/dotenv/lib/main";
+import { configDotenv } from "dotenv";
 
 configDotenv();
 
