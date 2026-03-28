@@ -1,7 +1,7 @@
 import jwt, { SignOptions } from "jsonwebtoken"
 
 interface UserPayload {
-    id: string
+    id: number
     username: string
 }
 
@@ -16,4 +16,14 @@ export function generateToken(user: UserPayload) : string {
         process.env.JWT_SECRET as string,
         {expiresIn: expires as SignOptions["expiresIn"]}
     );
+}
+
+export function verifyToken(token: string) : UserPayload {
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as UserPayload;
+        return decoded;
+    } catch (error) {
+        // console.log(error);
+        throw new Error('Invalid Token');
+    }
 }

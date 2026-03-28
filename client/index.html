@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Test</title>
+</head>
+<body>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        // Test 1 — no token, should be rejected
+        const noAuthSocket = io('http://localhost:3000')
+        noAuthSocket.on('connect_error', (err) => {
+            console.log('❌ No token test:', err.message)
+        })
+
+        // Test 2 — with token, should connect
+        // paste your token from /auth/login here
+        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJyZWQxR29hdCIsImlhdCI6MTc3NDczMjE5OCwiZXhwIjoxNzc1MzM2OTk4fQ.PTX-0o3SSMkpxFeA6jDzZUCdrGI4-yef2X1ecCNq4y8'
+
+        const authSocket = io('http://localhost:3000', {
+            auth: { token }
+        })
+        authSocket.on('connect', () => {
+            console.log('✅ Connected with token!')
+        })
+        authSocket.on('connect_error', (err) => {
+            console.log('❌ Auth test failed:', err.message)
+        })
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import express from "express";
-import { login, register } from "../services/auth.service.js";
+import { login, register } from "../services/auth.service";
 import expressAsyncHandler from "express-async-handler";
 import {z} from "zod"
 import { StatusCodes } from "http-status-codes";

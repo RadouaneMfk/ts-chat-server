@@ -2,10 +2,12 @@ import express, {Request, Response} from "express";
 import { configDotenv } from "dotenv";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { ClientToServerEvents, ServerToClientEvents, SocketData } from "./types/socket.types.js";
-import {prisma} from "./config/prisma.js"
-import authRouter from "./routes/auth.routes.js";
-import { errorHandler } from "./middleware/error.middleware.js";
+import { ClientToServerEvents, ServerToClientEvents, SocketData } from "./types/socket.types";
+// import {prisma} from "./config/prisma.js"
+import authRouter from "./routes/auth.routes";
+import { errorHandler } from "./middleware/error.middleware";
+import { HandleSocketAuth } from "./middleware/socket.middleware";
+import cors from 'cors';
 
 configDotenv();
 
@@ -13,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use('/auth', authRouter);
 
@@ -22,8 +25,14 @@ const io = new Server
     <ClientToServerEvents,
     ServerToClientEvents,
     {},
-    SocketData>(httpServer);
+    SocketData>(httpServer, {
+        cors: {
+            origin: '*',
+            methods: ['GET', 'POST'],
+        }
+    });
 
+io.use(HandleSocketAuth);
 
 io.on("connection", (socket) => {
     console.log(socket.id);

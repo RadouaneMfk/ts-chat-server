@@ -1,5 +1,5 @@
-import { generateToken } from "../utils/jwt.js";
-import { prisma } from "../config/prisma.js";
+import { generateToken } from "../utils/jwt";
+import { prisma } from "../config/prisma";
 import bcrypt from "bcryptjs";
 
 export const register = async(username: string, password: string) => {
