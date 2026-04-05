@@ -18,6 +18,7 @@ export interface ClientToServerEvents {
 }
 
 export interface ServerToClientEvents {
+    messagesHistory: (payload: MessagePayload[]) => void
     message: (payload: MessagePayload) => void
     userJoined: (payload: UserInfo) => void
     userLeft: (payload: UserInfo) => void
