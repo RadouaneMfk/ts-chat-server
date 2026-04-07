@@ -8,6 +8,9 @@ import authRouter from "./routes/auth.routes";
 import { errorHandler } from "./middleware/error.middleware";
 import { HandleSocketAuth } from "./middleware/socket.middleware";
 import cors from 'cors';
+import { messageHandler } from "./handler/message.handler";
+import { roomHandler } from "./handler/room.handler";
+import path from "path";
 
 configDotenv();
 
@@ -18,6 +21,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/auth', authRouter);
+
+app.use(express.static(path.join(__dirname, "../client")));
 
 const httpServer = createServer(app);
 
@@ -35,7 +40,9 @@ const io = new Server
 io.use(HandleSocketAuth);
 
 io.on("connection", (socket) => {
-    console.log(socket.id);
+    console.log(socket.data.user.username);
+    roomHandler(io, socket);
+    messageHandler(io, socket);
 })
 
 app.get("/health", (_req: Request, res: Response) => {
@@ -47,4 +54,3 @@ app.use(errorHandler);
 httpServer.listen(PORT, () => {
     console.log(`server is running at port http://localhost:${PORT}`);
 })
-

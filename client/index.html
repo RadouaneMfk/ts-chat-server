@@ -6,24 +6,43 @@
 <body>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
-        // Test 1 — no token, should be rejected
-        const noAuthSocket = io('http://localhost:3000')
-        noAuthSocket.on('connect_error', (err) => {
-            console.log('❌ No token test:', err.message)
-        })
+        // paste your token from POST /auth/login
+        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJyZWQxR29hdCIsImlhdCI6MTc3NTU1NzcxMSwiZXhwIjoxNzc2MTYyNTExfQ.Pnm40M5oJK21g79hbsMwbhNJs1uGdsSi-XI3jMANewc'
 
-        // Test 2 — with token, should connect
-        // paste your token from /auth/login here
-        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJyZWQxR29hdCIsImlhdCI6MTc3NDczMjE5OCwiZXhwIjoxNzc1MzM2OTk4fQ.PTX-0o3SSMkpxFeA6jDzZUCdrGI4-yef2X1ecCNq4y8'
-
-        const authSocket = io('http://localhost:3000', {
+        const socket = io('http://localhost:3000', {
             auth: { token }
         })
-        authSocket.on('connect', () => {
-            console.log('✅ Connected with token!')
+
+        socket.on('connect', () => {
+            console.log('✅ Connected:', socket.id)
+
+            // join room 1
+            socket.emit('joinRoom', '1')
         })
-        authSocket.on('connect_error', (err) => {
-            console.log('❌ Auth test failed:', err.message)
+
+        // receive message history when joining
+        socket.on('messagesHistory', (messages) => {
+            console.log('📜 Message history:', messages)
+        })
+
+        // receive new messages
+        socket.on('message', (payload) => {
+            console.log('💬 New message:', payload)
+        })
+
+        // someone joined the room
+        socket.on('userJoined', (user) => {
+            console.log('👤 User joined:', user)
+        })
+
+        // send a message after 2 seconds
+        setTimeout(() => {
+            socket.emit('sendMessage', 'Hello from client!', '1')
+            console.log('📤 Message sent')
+        }, 2000)
+
+        socket.on('connect_error', (err) => {
+            console.log('❌ Error:', err.message)
         })
     </script>
 </body>
