@@ -7,7 +7,7 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         // paste your token from POST /auth/login
-        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJyZWQxR29hdCIsImlhdCI6MTc3NjE2MjQ1OSwiZXhwIjoxNzc2NzY3MjU5fQ.J90X3Zpzov6CACWzr08R28d-wmlyYZMePrixzslUk3A'
+        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzYmVlZTMiLCJpYXQiOjE3NzYxNjI1MzQsImV4cCI6MTc3Njc2NzMzNH0.L84QfkTy2k6ORUr6AQUgiGJNsbpa2B19xzSLsFF18vw'
 
         const socket = io('http://localhost:3000', {
             auth: { token }
@@ -42,7 +42,7 @@
 
         // send a message after 2 seconds
         setTimeout(() => {
-            socket.emit('sendMessage', 'Hello from client!', '1')
+            socket.emit('sendMessage', 'Hello from client2!', '1')
             console.log('📤 Message sent')
         }, 2000)
 

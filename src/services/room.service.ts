@@ -6,11 +6,16 @@ export async function getRooms() : Promise<Room[]> {
     return rooms;
 }
 
-export async function getRoomMessages(roomId: number): Promise<(Message & {user: User})[]> {
+export async function getRoomMessages(roomId: number): Promise<(Message & {user: {id: number, username: string}})[]> {
 	const messages = await prisma.message.findMany({
-		where: {id: roomId},
+		where: {roomId: roomId},
 		include: {
-			user: true,
+			user: {
+				select: {
+					id: true,
+					username: true,
+				}
+			}
 		},
 		orderBy: {
 			createdAt: 'asc',
@@ -18,4 +23,22 @@ export async function getRoomMessages(roomId: number): Promise<(Message & {user:
 		take: 50,
 	})
 	return messages;
+}
+
+export async function addRoomMember(userId: number, roomId: number) {
+	await prisma.roomMember.upsert({
+		where: {
+			userId_roomId: {userId, roomId},
+		},
+		update: {},
+		create: {userId, roomId},
+	})
+}
+
+export async function removeRoomMember(userId: number, roomId: number) {
+	await prisma.roomMember.delete({
+		where: {
+			userId_roomId: {userId, roomId},
+		}
+	})
 }

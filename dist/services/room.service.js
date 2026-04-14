@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRooms = getRooms;
 exports.getRoomMessages = getRoomMessages;
+exports.addRoomMember = addRoomMember;
+exports.removeRoomMember = removeRoomMember;
 const prisma_1 = require("../config/prisma");
 async function getRooms() {
     const rooms = await prisma_1.prisma.room.findMany();
@@ -9,9 +11,14 @@ async function getRooms() {
 }
 async function getRoomMessages(roomId) {
     const messages = await prisma_1.prisma.message.findMany({
-        where: { id: roomId },
+        where: { roomId: roomId },
         include: {
-            user: true,
+            user: {
+                select: {
+                    id: true,
+                    username: true,
+                }
+            }
         },
         orderBy: {
             createdAt: 'asc',
@@ -19,5 +26,21 @@ async function getRoomMessages(roomId) {
         take: 50,
     });
     return messages;
+}
+async function addRoomMember(userId, roomId) {
+    await prisma_1.prisma.roomMember.upsert({
+        where: {
+            userId_roomId: { userId, roomId },
+        },
+        update: {},
+        create: { userId, roomId },
+    });
+}
+async function removeRoomMember(userId, roomId) {
+    await prisma_1.prisma.roomMember.delete({
+        where: {
+            userId_roomId: { userId, roomId },
+        }
+    });
 }
 //# sourceMappingURL=room.service.js.map
