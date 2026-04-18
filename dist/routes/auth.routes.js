@@ -9,16 +9,12 @@ const express_async_handler_1 = __importDefault(require("express-async-handler")
 const zod_1 = require("zod");
 const http_status_codes_1 = require("http-status-codes");
 const authRouter = express_1.default.Router();
-const registerSchema = zod_1.z.object({
-    username: zod_1.z.string().trim().nonempty().min(5, "Username must be atleast 5 characters"),
-    password: zod_1.z.string().trim().nonempty().min(8, "Password must be atleast 8 characters"),
-});
-const loginSchema = zod_1.z.object({
+const authSchema = zod_1.z.object({
     username: zod_1.z.string().trim().nonempty().min(5, "Username must be atleast 5 characters"),
     password: zod_1.z.string().trim().nonempty().min(8, "Password must be atleast 8 characters"),
 });
 authRouter.post('/register', (0, express_async_handler_1.default)(async (req, res) => {
-    const parsed = registerSchema.safeParse(req.body);
+    const parsed = authSchema.safeParse(req.body);
     if (!parsed.success) {
         res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
             errors: parsed.error.issues,
@@ -33,7 +29,7 @@ authRouter.post('/register', (0, express_async_handler_1.default)(async (req, re
     });
 }));
 authRouter.post('/login', (0, express_async_handler_1.default)(async (req, res) => {
-    const parsed = loginSchema.safeParse(req.body);
+    const parsed = authSchema.safeParse(req.body);
     if (!parsed.success) {
         res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
             errors: parsed.error.issues,

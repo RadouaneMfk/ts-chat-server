@@ -9,10 +9,14 @@ export function messageHandler(io: Server, socket: Socket) {
         const payload: MessagePayload = {
             content: savedMessage.content,
             userId: savedMessage.userId.toString(),
+            username: socket.data.user.username,
             roomId: savedMessage.roomId.toString(),
             time: savedMessage.createdAt,
 
         }
         io.to(roomId).emit("message", payload);
-    })    
+    })
+    socket.on("typing", (roomId: string) => {
+        socket.to(roomId).emit('userTyping', socket.data.user);
+    })
 }

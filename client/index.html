@@ -1,54 +1,166 @@
-<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chat Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chat app</title>
 </head>
 <body>
+    <div id="login-screen">
+        <h2>Login</h2>
+        <input id="username" type="text" placeholder="Username" />
+        <input id="password" type="password" placeholder="Password" />
+        <button id="login-btn">Login</button>
+        <p id="login-error"></p>
+    </div>
+    <div id="rooms-screen" style="display: none;">
+        <h2>Rooms</h2>
+        <div id="rooms-list"></div>
+        <button id="logout-btn">Logout</button>
+    </div>
+    <div id="chat-screen" style="display: none;">
+        <h2 id="room-name">Room</h2>
+        <div style="display: flex;">
+            
+            <!-- messages area -->
+            <div id="messages" style="flex: 1; height: 400px; overflow-y: scroll; border: 1px solid #ccc;"></div>
+            
+            <div id="online-users" style="width: 150px; padding: 10px;"></div>
+            <button id="logout-btn">Logout</button>
+        </div>
+        
+        <!-- message input -->
+        <input id="message-input" type="text" placeholder="Type a message..." />
+        <p id="typing-indicator"></p>
+        <button id="send-btn">Send</button>
+    </div>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
-        // paste your token from POST /auth/login
-        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJyZWQxR29hdCIsImlhdCI6MTc3NjE2MjQ1OSwiZXhwIjoxNzc2NzY3MjU5fQ.J90X3Zpzov6CACWzr08R28d-wmlyYZMePrixzslUk3A'
+        document.getElementById('logout-btn').onclick = () => {
+    // clear token
+        sessionStorage.removeItem('token')
+        token = null
+    
+    // disconnect socket if connected
+        if (socket) {
+            socket.disconnect()
+            socket = null
+        }
+    
+    // go back to login screen
+        document.getElementById('chat-screen').style.display = 'none'
+        document.getElementById('rooms-screen').style.display = 'none'
+        document.getElementById('login-screen').style.display = 'block'
+    
+    // clear rooms list so it doesn't duplicate on next login
+        document.getElementById('rooms-list').innerHTML = ''
+    
+    // clear messages
+        document.getElementById('messages').innerHTML = ''
+    }
+        const fetchRooms = async () => {
+            const response = await fetch('/rooms');
+            const rooms = await response.json();
+            rooms.forEach(room => {
+                const btn = document.createElement("button");
+                btn.textContent = `# ${room.name}`;
+                btn.onclick = () => joinRoom(room.id);
+                document.getElementById('rooms-list').appendChild(btn);
+            });
+        }
+        let token = null;
+        token = sessionStorage.getItem('token');
+        if (token) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('rooms-screen').style.display = 'block';
+            fetchRooms();
+        }
+        let currentRoomId = null;
+        let socket = null;
+        document.getElementById('login-btn').onclick = async () => {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const response = await fetch("/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                })
+            })
+            const data = await response.json();
+            if (!response.ok) {
+                document.getElementById('login-error').textContent = data.error;
+                return;
+            }
+            console.log(data);
+            token = data.token;
+            sessionStorage.setItem('token', token);
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("rooms-screen").style.display = "block";
+            fetchRooms();
+        }
+        
 
-        const socket = io('http://localhost:3000', {
-            auth: { token }
-        })
 
-        socket.on('connect', () => {
-            console.log('✅ Connected:', socket.id)
+        const addMessage = (username, content) => {
+            const div = document.createElement('div');
+            div.textContent = `${username}: ${content}`;
+            const messages = document.getElementById('messages');
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
 
-            // join room 1
-            socket.emit('joinRoom', '1')
-        })
+        document.getElementById('send-btn').onclick = () => {
+            const content = document.getElementById('message-input').value
+            if (!content.trim()) return
+            socket.emit('sendMessage', content, String(currentRoomId))
+            document.getElementById('message-input').value = ''
+        }
 
-        socket.on('messagesHistory', (messages) => {
-            console.log('📜 Message history:', messages)
-        })
+        const joinRoom = (roomId) => {
+            currentRoomId = roomId;
+            socket = io({auth: {token}});
+            socket.emit('joinRoom', String(roomId));
+            socket.on("messagesHistory", (messages) => {
+                messages.forEach(msg => addMessage(msg.user.username, msg.content));
+            })
+            socket.on("message", (message) => {
+                console.log(message);
+                
+                addMessage(message.username, message.content);
+            })
+            socket.on("roomUsers", (users) => {
+                const list = document.getElementById('online-users');
+                list.innerHTML = '<h4>Online</h4>';
+                users.forEach(user => {
+                    const p = document.createElement('p');
+                    p.textContent = `• ${user.username}`;
+                    list.appendChild(p);
+                })
+            })
+            socket.on("userLeft", (user) => {
+                addMessage('System', `${user.username} left the room.`);
+            })
+            socket.on("userJoined", (user) => {
+                addMessage('System', `${user.username} join the room.`);
+            })
 
-        socket.on('message', (payload) => {
-            console.log('💬 New message:', payload)
-        })
-
-        socket.on('userJoined', (user) => {
-            console.log('👤 User joined:', user)
-        })
-
-        socket.on('userLeft', (user) => {
-            console.log('👋 User left:', user)
-        })
-
-        socket.on('roomUsers', (users) => {
-            console.log('👥 Online users:', users)
-        })
-
-        // send a message after 2 seconds
-        setTimeout(() => {
-            socket.emit('sendMessage', 'Hello from client!', '1')
-            console.log('📤 Message sent')
-        }, 2000)
-
-        socket.on('connect_error', (err) => {
-            console.log('❌ Error:', err.message)
-        })
+            document.getElementById('message-input').oninput = () => {
+                socket.emit('typing', String(currentRoomId));
+            }
+            let typingTimeout = null;
+            socket.on('userTyping', (user) => {
+                document.getElementById('typing-indicator').textContent = `${user.username} is typing...`;
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    document.getElementById('typing-indicator').textContent = ''
+                }, 1500);
+            })
+            document.getElementById('rooms-screen').style.display = "none";
+            document.getElementById('chat-screen').style.display = "block";
+        }
     </script>
 </body>
 </html>

@@ -9,10 +9,14 @@ function messageHandler(io, socket) {
         const payload = {
             content: savedMessage.content,
             userId: savedMessage.userId.toString(),
+            username: socket.data.user.username,
             roomId: savedMessage.roomId.toString(),
             time: savedMessage.createdAt,
         };
         io.to(roomId).emit("message", payload);
+    });
+    socket.on("typing", (roomId) => {
+        socket.to(roomId).emit('userTyping', socket.data.user);
     });
 }
 //# sourceMappingURL=message.handler.js.map

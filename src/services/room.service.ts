@@ -6,6 +6,14 @@ export async function getRooms() : Promise<Room[]> {
     return rooms;
 }
 
+export async function createRoom(name: string) {
+	return await prisma.room.create({
+		data: {
+			name,
+		}
+	})
+}
+
 export async function getRoomMessages(roomId: number): Promise<(Message & {user: {id: number, username: string}})[]> {
 	const messages = await prisma.message.findMany({
 		where: {roomId: roomId},

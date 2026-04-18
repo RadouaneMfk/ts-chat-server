@@ -11,6 +11,7 @@ import cors from 'cors';
 import { messageHandler } from "./handler/message.handler";
 import { roomHandler } from "./handler/room.handler";
 import path from "path";
+import roomRoutes from "./routes/room.routes";
 
 configDotenv();
 
@@ -20,22 +21,22 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use('/auth', authRouter);
+app.use(express.urlencoded({extended: true}));
 
 app.use(express.static(path.join(__dirname, "../client")));
 
 const httpServer = createServer(app);
 
 const io = new Server
-    <ClientToServerEvents,
-    ServerToClientEvents,
-    {},
-    SocketData>(httpServer, {
-        cors: {
-            origin: '*',
-            methods: ['GET', 'POST'],
-        }
-    });
+<ClientToServerEvents,
+ServerToClientEvents,
+{},
+SocketData>(httpServer, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+    }
+});
 
 io.use(HandleSocketAuth);
 
@@ -44,6 +45,8 @@ io.on("connection", (socket) => {
     roomHandler(io, socket);
     messageHandler(io, socket);
 })
+app.use('/auth', authRouter);
+app.use("/rooms", roomRoutes);
 
 app.get("/health", (_req: Request, res: Response) => {
     return res.json({status: 'ok'});

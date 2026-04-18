@@ -1,6 +1,7 @@
 export interface MessagePayload {
     content: string
     userId: string
+    username: string
     roomId: string
     time: Date
 }
@@ -23,6 +24,7 @@ export interface ServerToClientEvents {
     userJoined: (payload: UserInfo) => void
     userLeft: (payload: UserInfo) => void
     roomUsers: (users: UserInfo[]) => void
+    userTyping: (user: UserInfo) => void
 }
 
 export interface SocketData {

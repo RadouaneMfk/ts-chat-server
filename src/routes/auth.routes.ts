@@ -6,18 +6,13 @@ import { StatusCodes } from "http-status-codes";
 
 const authRouter = express.Router();
 
-const registerSchema = z.object({
-    username: z.string().trim().nonempty().min(5, "Username must be atleast 5 characters"),
-    password: z.string().trim().nonempty().min(8, "Password must be atleast 8 characters"),
-})
-
-const loginSchema = z.object({
+const authSchema = z.object({
     username: z.string().trim().nonempty().min(5, "Username must be atleast 5 characters"),
     password: z.string().trim().nonempty().min(8, "Password must be atleast 8 characters"),
 })
 
 authRouter.post('/register', expressAsyncHandler(async (req, res) => {
-    const parsed = registerSchema.safeParse(req.body);
+    const parsed = authSchema.safeParse(req.body);
 
     if (!parsed.success) {
         res.status(StatusCodes.BAD_REQUEST).json({
@@ -36,8 +31,8 @@ authRouter.post('/register', expressAsyncHandler(async (req, res) => {
 }));
 
 authRouter.post('/login', expressAsyncHandler(async (req, res) => {
-    const parsed = loginSchema.safeParse(req.body);
-
+    const parsed = authSchema.safeParse(req.body);
+    
     if (!parsed.success) {
         res.status(StatusCodes.BAD_REQUEST).json({
             errors: parsed.error.issues,

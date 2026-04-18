@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRooms = getRooms;
+exports.createRoom = createRoom;
 exports.getRoomMessages = getRoomMessages;
 exports.addRoomMember = addRoomMember;
 exports.removeRoomMember = removeRoomMember;
@@ -8,6 +9,13 @@ const prisma_1 = require("../config/prisma");
 async function getRooms() {
     const rooms = await prisma_1.prisma.room.findMany();
     return rooms;
+}
+async function createRoom(name) {
+    return await prisma_1.prisma.room.create({
+        data: {
+            name,
+        }
+    });
 }
 async function getRoomMessages(roomId) {
     const messages = await prisma_1.prisma.message.findMany({
