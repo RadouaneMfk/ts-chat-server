@@ -32,7 +32,7 @@ const io = new socket_io_1.Server(httpServer, {
 });
 io.use(socket_middleware_1.HandleSocketAuth);
 io.on("connection", (socket) => {
-    console.log(socket.data.user.username);
+    // console.log(socket.data.user.username);
     (0, room_handler_1.roomHandler)(io, socket);
     (0, message_handler_1.messageHandler)(io, socket);
 });

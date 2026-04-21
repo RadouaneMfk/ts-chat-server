@@ -174,7 +174,7 @@ document.getElementById('go-to-login').onclick = () => {
                 messages.forEach(msg => addMessage(msg.user.username, msg.content));
             })
             socket.on("message", (message) => {
-                console.log(message);
+                // console.log(message);
                 
                 addMessage(message.username, message.content);
             })

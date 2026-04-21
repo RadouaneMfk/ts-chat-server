@@ -41,7 +41,7 @@ SocketData>(httpServer, {
 io.use(HandleSocketAuth);
 
 io.on("connection", (socket) => {
-    console.log(socket.data.user.username);
+    // console.log(socket.data.user.username);
     roomHandler(io, socket);
     messageHandler(io, socket);
 })
