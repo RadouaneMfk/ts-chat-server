@@ -11,5 +11,19 @@ services:
         volumes:
             - postgres_data:/var/lib/postgresql/data
 
+    chatapp:
+        build: .
+        container_name: chat_app
+        ports:
+            - "3000:3000"
+        environment:
+            DATABASE_URL: postgresql://chatuser:chatpass@postgres:5432/chatdb
+            NODE_ENV: production
+            PORT: 3000
+            JWT_SECRET: dsfdsgfdsgmflkgmfd
+            JWT_EXPIRES_IN: 7d
+        depends_on:
+            - postgres
+
 volumes:
     postgres_data:
