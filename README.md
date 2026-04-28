@@ -43,7 +43,7 @@ A real-time chat application built with **TypeScript**, **Node.js**, **Socket.io
 
 **1. Clone the repo**
 ```bash
-git clone https://github.com/yourusername/chat-server.git
+git clone https://github.com/RadouaneMfk/ts-chat-server.git
 cd chat-server
 ```
 
