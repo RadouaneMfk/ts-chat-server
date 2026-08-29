@@ -7,7 +7,7 @@ COPY prisma ./prisma/
 
 RUN npm install
 
-COPY . .
+COPY ./app .
 
 RUN npx prisma generate
 
